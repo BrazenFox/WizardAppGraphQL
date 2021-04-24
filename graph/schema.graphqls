@@ -1,0 +1,51 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Todo {
+    id: ID!
+    text: String!
+    done: Boolean!
+    user: User!
+}
+
+type User {
+    id: ID!
+    username: String!
+    password:String!
+    roles:[String!]!
+}
+
+
+input LoginRequest {
+    username:String!
+    password:String!
+}
+
+
+type LoginResponse {
+    id: ID!
+    username:String!
+    roles:[String!]!
+    tokenType:String!
+    accessToken:String!
+}
+
+type BadResponse{
+    path:String!
+    message:String!
+    status:Int!
+    error:String!
+}
+
+type Query {
+    todos: [Todo!]!
+    logoutAuth:String!
+}
+
+type Mutation {
+    loginAuth(input:LoginRequest!): LoginResponse!
+}
+scalar Response
+
+
