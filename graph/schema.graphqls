@@ -13,13 +13,46 @@ type User {
     id: ID!
     username: String!
     password:String!
-    roles:[String!]!
+    roles:[Role!]!
+}
+
+type Role{
+    id:ID!
+    name:String!
+}
+
+input Token{
+    token:String!
 }
 
 
 input LoginRequest {
     username:String!
     password:String!
+}
+
+input UserFindByID{
+    id:ID!
+    token:String!
+}
+
+input UserDeleteByID{
+    id:ID!
+    token:String!
+}
+
+input CreateUser{
+    username:String!
+    password:String!
+    roles:[String!]!
+    token:String!
+}
+input UpdateUser{
+    id:ID!
+    username:String!
+    password:String!
+    roles:[String!]!
+    token:String!
 }
 
 
@@ -41,10 +74,15 @@ type BadResponse{
 type Query {
     todos: [Todo!]!
     logoutAuth:String!
+    getUsers(input:Token!):[User!]!
+    getUser(input:UserFindByID!):User!
 }
 
 type Mutation {
     loginAuth(input:LoginRequest!): LoginResponse!
+    createUser(input:CreateUser!):String!
+    updateUser(input:UpdateUser!):String!
+    deleteUser(input:UserDeleteByID):String!
 }
 scalar Response
 
