@@ -1,0 +1,22 @@
+#FROM golang:latest
+#RUN mkdir /app
+#ADD . /app/
+#WORKDIR /app
+#RUN go build -o server .
+#EXPOSE 8081
+#CMD ["/app/server"]
+#docker build -t my-golang-app .
+#docker run -it --rm -p 8081:8081/tcp --name my-running-app my-golang-app
+#docker stop my-running-app
+
+FROM golang:1.13.4-alpine3.10 as build
+WORKDIR /app
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
+COPY . .
+RUN go build -o server.go
+EXPOSE 8081
+CMD ["/app/server.go"]

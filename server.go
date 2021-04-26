@@ -34,10 +34,10 @@ func main() {
 
 	router := chi.NewRouter()
 	router.Use(cors.New(cors.Options{
-		//AllowedOrigins:   []string{"http://localhost:8081","http://localhost:3000"},
-		AllowedOrigins:   []string{"http://localhost:3000"},
-		AllowedMethods: []string{},
-		AllowedHeaders: []string{},
+		AllowedOrigins: []string{"http://localhost:8081", "http://localhost:3000", "http://192.168.99.102:8081", "http://192.168.99.102:3000"},
+		//AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{},
+		AllowedHeaders:   []string{},
 		AllowCredentials: true,
 		Debug:            true,
 	}).Handler)
@@ -46,16 +46,16 @@ func main() {
 	srv.AddTransport(&transport.Websocket{
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
-		return r.Host == "localhost:8081"
-	}, ReadBufferSize: 1024, WriteBufferSize: 1024}})
+				return r.Host == "localhost:8081"
+			}, ReadBufferSize: 1024, WriteBufferSize: 1024}})
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground",  port)
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	//log.Fatal(http.ListenAndServe(":"+ port, nil))
-	err:=http.ListenAndServe(":8081", router)
-	if err!=nil{
+	err := http.ListenAndServe(":8081", router)
+	if err != nil {
 		panic(err)
 	}
 

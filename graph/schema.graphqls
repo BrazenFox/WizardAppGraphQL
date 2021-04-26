@@ -2,6 +2,102 @@
 #
 # https://gqlgen.com/getting-started/
 
+
+input Token{
+    token:String!
+}
+
+input LoginRequest {
+    username:String!
+    password:String!
+}
+
+input UserFindByID{
+    id:ID!
+    token:String!
+}
+
+input UserDeleteByID{
+    id:ID!
+    token:String!
+}
+input WizardFindByID{
+    id:ID!
+    token:String!
+}
+input WizardDeleteByID{
+    id:ID!
+    token:String!
+}
+
+input ResultsFindByID{
+    id:ID!
+    token:String!
+}
+
+input CreateUser{
+    username:String!
+    password:String!
+    roles:[String!]!
+    token:String!
+}
+
+input UpdateUser{
+    id:ID!
+    username:String!
+    password:String!
+    roles:[String!]!
+    token:String!
+}
+
+input InputUser{
+    id: ID!
+}
+input CreateWizard{
+    name:String!
+    creator:InputUser!
+    pages:[InputPage!]!
+    token:String!
+}
+input UpdateWizard{
+    id:ID!
+    name:String!
+    creator:InputUser!
+    pages:[InputPage!]!
+    token:String!
+}
+
+input InputPage{
+    name:String!
+    type:String!
+    content:String!
+    buttons:[InputButton!]!
+}
+input InputButton{
+    name:String!
+    toPage:InputToPage!
+}
+input InputToPage{
+    name:String!
+}
+input CreateResult{
+    token:String!
+    user_id:ID!
+    wizard_id:ID!
+    notes:[InputNote!]!
+}
+input InputNote{
+    page:InputPageResult!
+    button:InputButtonResult!
+}
+input InputPageResult{
+    id:ID!
+}
+input InputButtonResult{
+    id:ID!
+}
+
+
 type Todo {
     id: ID!
     text: String!
@@ -21,40 +117,25 @@ type Role{
     name:String!
 }
 
-input Token{
-    token:String!
-}
-
-
-input LoginRequest {
-    username:String!
-    password:String!
-}
-
-input UserFindByID{
+type Wizard{
     id:ID!
-    token:String!
+    name:String!
+    creator:User!
+    pages:[Page!]!
 }
 
-input UserDeleteByID{
+type Page{
     id:ID!
-    token:String!
+    name:String!
+    type:String!
+    content:String!
+    buttons:[Button!]!
 }
-
-input CreateUser{
-    username:String!
-    password:String!
-    roles:[String!]!
-    token:String!
-}
-input UpdateUser{
+type Button{
     id:ID!
-    username:String!
-    password:String!
-    roles:[String!]!
-    token:String!
+    name:String!
+    toPage:Page!
 }
-
 
 type LoginResponse {
     id: ID!
@@ -71,11 +152,32 @@ type BadResponse{
     error:String!
 }
 
+
+type Result{
+    id:ID!
+    wizard:Wizard!
+    user:User!
+    date:String!
+    note:[Note!]!
+}
+
+type Note{
+    page:Page!
+    button:Button!
+}
+
+
+
 type Query {
     todos: [Todo!]!
     logoutAuth:String!
     getUsers(input:Token!):[User!]!
     getUser(input:UserFindByID!):User!
+    getWizards(input:Token!):[Wizard!]!
+    getWizard(input:WizardFindByID!):Wizard!
+    getResultsForUser(input:ResultsFindByID!):[Result!]!
+    getResultsForModer(input:ResultsFindByID!):[Result!]!
+    getResults(input:Token!):[Result!]!
 }
 
 type Mutation {
@@ -83,6 +185,11 @@ type Mutation {
     createUser(input:CreateUser!):String!
     updateUser(input:UpdateUser!):String!
     deleteUser(input:UserDeleteByID):String!
+    createWizard(input:CreateWizard):String!
+    updateWizard(input:UpdateWizard):String!
+    deleteWizard(input:WizardDeleteByID):String!
+    createResult(input:CreateResult):String!
+
 }
 scalar Response
 
