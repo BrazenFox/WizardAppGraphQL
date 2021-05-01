@@ -24,7 +24,11 @@ var URL = GetUrl()
 func GetUrl() string {
 	p := properties.MustLoadFile("config.conf", properties.UTF8)
 	url := p.GetString("url", "http://192.168.99.102:8080")
-	return url
+	if url == "" {
+		return "http://192.168.99.102:8080"
+	} else {
+		return url
+	}
 
 }
 

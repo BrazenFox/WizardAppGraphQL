@@ -23,12 +23,22 @@ import (
 }*/
 func GetPort() string {
 	p := properties.MustLoadFile("config.conf", properties.UTF8)
-	return p.GetString("port", "8081")
+	port := p.GetString("port", "8081")
+	if port == "" {
+		return "8081"
+	} else {
+		return port
+	}
 
 }
 func GetIncomingUrl() string {
 	p := properties.MustLoadFile("config.conf", properties.UTF8)
-	return p.GetString("incomingurl", "http://localhost:3000")
+	incomingurl := p.GetString("incomingurl", "http://localhost:3000")
+	if incomingurl == "" {
+		return "http://localhost:3000"
+	} else {
+		return incomingurl
+	}
 
 }
 func main() {
