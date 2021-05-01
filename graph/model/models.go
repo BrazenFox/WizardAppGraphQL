@@ -1,12 +1,5 @@
 package model
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
-}
-
 type User struct {
 	ID       int     `json:"id"`
 	Username string  `json:"username"`
@@ -22,18 +15,11 @@ type Role struct {
 type Token struct {
 	Token string `json:"token"`
 }
-type UserFindByID struct {
+type RequestWithID struct {
 	ID    int    `json:"id"`
 	Token string `json:"token"`
 }
-type WizardFindByID struct {
-	ID    int    `json:"id"`
-	Token string `json:"token"`
-}
-type ResultsFindByID struct {
-	ID    int    `json:"id"`
-	Token string `json:"token"`
-}
+
 type CreateUser struct {
 	Username string   `json:"username"`
 	Password string   `json:"password"`
@@ -46,14 +32,6 @@ type UpdateUser struct {
 	Password string   `json:"password"`
 	Roles    []string `json:"roles"`
 	Token    string   `json:"token"`
-}
-type UserDeleteByID struct {
-	ID    int    `json:"id"`
-	Token string `json:"token"`
-}
-type WizardDeleteByID struct {
-	ID    int    `json:"id"`
-	Token string `json:"token"`
 }
 
 type InputUser struct {

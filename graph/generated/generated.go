@@ -68,8 +68,8 @@ type ComplexityRoot struct {
 		CreateResult func(childComplexity int, input *model.CreateResult) int
 		CreateUser   func(childComplexity int, input model.CreateUser) int
 		CreateWizard func(childComplexity int, input *model.CreateWizard) int
-		DeleteUser   func(childComplexity int, input *model.UserDeleteByID) int
-		DeleteWizard func(childComplexity int, input *model.WizardDeleteByID) int
+		DeleteUser   func(childComplexity int, input *model.RequestWithID) int
+		DeleteWizard func(childComplexity int, input *model.RequestWithID) int
 		LoginAuth    func(childComplexity int, input model.LoginRequest) int
 		UpdateUser   func(childComplexity int, input model.UpdateUser) int
 		UpdateWizard func(childComplexity int, input *model.UpdateWizard) int
@@ -90,14 +90,13 @@ type ComplexityRoot struct {
 
 	Query struct {
 		GetResults         func(childComplexity int, input model.Token) int
-		GetResultsForModer func(childComplexity int, input model.ResultsFindByID) int
-		GetResultsForUser  func(childComplexity int, input model.ResultsFindByID) int
-		GetUser            func(childComplexity int, input model.UserFindByID) int
+		GetResultsForModer func(childComplexity int, input model.RequestWithID) int
+		GetResultsForUser  func(childComplexity int, input model.RequestWithID) int
+		GetUser            func(childComplexity int, input model.RequestWithID) int
 		GetUsers           func(childComplexity int, input model.Token) int
-		GetWizard          func(childComplexity int, input model.WizardFindByID) int
+		GetWizard          func(childComplexity int, input model.RequestWithID) int
 		GetWizards         func(childComplexity int, input model.Token) int
 		LogoutAuth         func(childComplexity int) int
-		Todos              func(childComplexity int) int
 	}
 
 	Result struct {
@@ -111,13 +110,6 @@ type ComplexityRoot struct {
 	Role struct {
 		ID   func(childComplexity int) int
 		Name func(childComplexity int) int
-	}
-
-	Todo struct {
-		Done func(childComplexity int) int
-		ID   func(childComplexity int) int
-		Text func(childComplexity int) int
-		User func(childComplexity int) int
 	}
 
 	User struct {
@@ -139,21 +131,20 @@ type MutationResolver interface {
 	LoginAuth(ctx context.Context, input model.LoginRequest) (*model.LoginResponse, error)
 	CreateUser(ctx context.Context, input model.CreateUser) (string, error)
 	UpdateUser(ctx context.Context, input model.UpdateUser) (string, error)
-	DeleteUser(ctx context.Context, input *model.UserDeleteByID) (string, error)
+	DeleteUser(ctx context.Context, input *model.RequestWithID) (string, error)
 	CreateWizard(ctx context.Context, input *model.CreateWizard) (string, error)
 	UpdateWizard(ctx context.Context, input *model.UpdateWizard) (string, error)
-	DeleteWizard(ctx context.Context, input *model.WizardDeleteByID) (string, error)
+	DeleteWizard(ctx context.Context, input *model.RequestWithID) (string, error)
 	CreateResult(ctx context.Context, input *model.CreateResult) (string, error)
 }
 type QueryResolver interface {
-	Todos(ctx context.Context) ([]*model.Todo, error)
 	LogoutAuth(ctx context.Context) (string, error)
 	GetUsers(ctx context.Context, input model.Token) ([]*model.User, error)
-	GetUser(ctx context.Context, input model.UserFindByID) (*model.User, error)
+	GetUser(ctx context.Context, input model.RequestWithID) (*model.User, error)
 	GetWizards(ctx context.Context, input model.Token) ([]*model.Wizard, error)
-	GetWizard(ctx context.Context, input model.WizardFindByID) (*model.Wizard, error)
-	GetResultsForUser(ctx context.Context, input model.ResultsFindByID) ([]*model.Result, error)
-	GetResultsForModer(ctx context.Context, input model.ResultsFindByID) ([]*model.Result, error)
+	GetWizard(ctx context.Context, input model.RequestWithID) (*model.Wizard, error)
+	GetResultsForUser(ctx context.Context, input model.RequestWithID) ([]*model.Result, error)
+	GetResultsForModer(ctx context.Context, input model.RequestWithID) ([]*model.Result, error)
 	GetResults(ctx context.Context, input model.Token) ([]*model.Result, error)
 }
 
@@ -302,7 +293,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteUser(childComplexity, args["input"].(*model.UserDeleteByID)), true
+		return e.complexity.Mutation.DeleteUser(childComplexity, args["input"].(*model.RequestWithID)), true
 
 	case "Mutation.deleteWizard":
 		if e.complexity.Mutation.DeleteWizard == nil {
@@ -314,7 +305,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteWizard(childComplexity, args["input"].(*model.WizardDeleteByID)), true
+		return e.complexity.Mutation.DeleteWizard(childComplexity, args["input"].(*model.RequestWithID)), true
 
 	case "Mutation.loginAuth":
 		if e.complexity.Mutation.LoginAuth == nil {
@@ -423,7 +414,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetResultsForModer(childComplexity, args["input"].(model.ResultsFindByID)), true
+		return e.complexity.Query.GetResultsForModer(childComplexity, args["input"].(model.RequestWithID)), true
 
 	case "Query.getResultsForUser":
 		if e.complexity.Query.GetResultsForUser == nil {
@@ -435,7 +426,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetResultsForUser(childComplexity, args["input"].(model.ResultsFindByID)), true
+		return e.complexity.Query.GetResultsForUser(childComplexity, args["input"].(model.RequestWithID)), true
 
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
@@ -447,7 +438,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetUser(childComplexity, args["input"].(model.UserFindByID)), true
+		return e.complexity.Query.GetUser(childComplexity, args["input"].(model.RequestWithID)), true
 
 	case "Query.getUsers":
 		if e.complexity.Query.GetUsers == nil {
@@ -471,7 +462,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetWizard(childComplexity, args["input"].(model.WizardFindByID)), true
+		return e.complexity.Query.GetWizard(childComplexity, args["input"].(model.RequestWithID)), true
 
 	case "Query.getWizards":
 		if e.complexity.Query.GetWizards == nil {
@@ -491,13 +482,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.LogoutAuth(childComplexity), true
-
-	case "Query.todos":
-		if e.complexity.Query.Todos == nil {
-			break
-		}
-
-		return e.complexity.Query.Todos(childComplexity), true
 
 	case "Result.date":
 		if e.complexity.Result.Date == nil {
@@ -547,34 +531,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Role.Name(childComplexity), true
-
-	case "Todo.done":
-		if e.complexity.Todo.Done == nil {
-			break
-		}
-
-		return e.complexity.Todo.Done(childComplexity), true
-
-	case "Todo.id":
-		if e.complexity.Todo.ID == nil {
-			break
-		}
-
-		return e.complexity.Todo.ID(childComplexity), true
-
-	case "Todo.text":
-		if e.complexity.Todo.Text == nil {
-			break
-		}
-
-		return e.complexity.Todo.Text(childComplexity), true
-
-	case "Todo.user":
-		if e.complexity.Todo.User == nil {
-			break
-		}
-
-		return e.complexity.Todo.User(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -710,25 +666,7 @@ input LoginRequest {
     password:String!
 }
 
-input UserFindByID{
-    id:ID!
-    token:String!
-}
-
-input UserDeleteByID{
-    id:ID!
-    token:String!
-}
-input WizardFindByID{
-    id:ID!
-    token:String!
-}
-input WizardDeleteByID{
-    id:ID!
-    token:String!
-}
-
-input ResultsFindByID{
+input RequestWithID{
     id:ID!
     token:String!
 }
@@ -795,14 +733,6 @@ input InputButtonResult{
     id:ID!
 }
 
-
-type Todo {
-    id: ID!
-    text: String!
-    done: Boolean!
-    user: User!
-}
-
 type User {
     id: ID!
     username: String!
@@ -867,14 +797,13 @@ type Note{
 
 
 type Query {
-    todos: [Todo!]!
     logoutAuth:String!
     getUsers(input:Token!):[User!]!
-    getUser(input:UserFindByID!):User!
+    getUser(input:RequestWithID!):User!
     getWizards(input:Token!):[Wizard!]!
-    getWizard(input:WizardFindByID!):Wizard!
-    getResultsForUser(input:ResultsFindByID!):[Result!]!
-    getResultsForModer(input:ResultsFindByID!):[Result!]!
+    getWizard(input:RequestWithID!):Wizard!
+    getResultsForUser(input:RequestWithID!):[Result!]!
+    getResultsForModer(input:RequestWithID!):[Result!]!
     getResults(input:Token!):[Result!]!
 }
 
@@ -882,10 +811,10 @@ type Mutation {
     loginAuth(input:LoginRequest!): LoginResponse!
     createUser(input:CreateUser!):String!
     updateUser(input:UpdateUser!):String!
-    deleteUser(input:UserDeleteByID):String!
+    deleteUser(input:RequestWithID):String!
     createWizard(input:CreateWizard):String!
     updateWizard(input:UpdateWizard):String!
-    deleteWizard(input:WizardDeleteByID):String!
+    deleteWizard(input:RequestWithID):String!
     createResult(input:CreateResult):String!
 
 }
@@ -948,10 +877,10 @@ func (ec *executionContext) field_Mutation_createWizard_args(ctx context.Context
 func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.UserDeleteByID
+	var arg0 *model.RequestWithID
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOUserDeleteByID2ᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐUserDeleteByID(ctx, tmp)
+		arg0, err = ec.unmarshalORequestWithID2ᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐRequestWithID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -963,10 +892,10 @@ func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_deleteWizard_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.WizardDeleteByID
+	var arg0 *model.RequestWithID
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOWizardDeleteByID2ᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐWizardDeleteByID(ctx, tmp)
+		arg0, err = ec.unmarshalORequestWithID2ᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐRequestWithID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1038,10 +967,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_getResultsForModer_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.ResultsFindByID
+	var arg0 model.RequestWithID
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNResultsFindByID2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐResultsFindByID(ctx, tmp)
+		arg0, err = ec.unmarshalNRequestWithID2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐRequestWithID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1053,10 +982,10 @@ func (ec *executionContext) field_Query_getResultsForModer_args(ctx context.Cont
 func (ec *executionContext) field_Query_getResultsForUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.ResultsFindByID
+	var arg0 model.RequestWithID
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNResultsFindByID2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐResultsFindByID(ctx, tmp)
+		arg0, err = ec.unmarshalNRequestWithID2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐRequestWithID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1083,10 +1012,10 @@ func (ec *executionContext) field_Query_getResults_args(ctx context.Context, raw
 func (ec *executionContext) field_Query_getUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.UserFindByID
+	var arg0 model.RequestWithID
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUserFindByID2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐUserFindByID(ctx, tmp)
+		arg0, err = ec.unmarshalNRequestWithID2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐRequestWithID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1113,10 +1042,10 @@ func (ec *executionContext) field_Query_getUsers_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_getWizard_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.WizardFindByID
+	var arg0 model.RequestWithID
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNWizardFindByID2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐWizardFindByID(ctx, tmp)
+		arg0, err = ec.unmarshalNRequestWithID2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐRequestWithID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1749,7 +1678,7 @@ func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteUser(rctx, args["input"].(*model.UserDeleteByID))
+		return ec.resolvers.Mutation().DeleteUser(rctx, args["input"].(*model.RequestWithID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1875,7 +1804,7 @@ func (ec *executionContext) _Mutation_deleteWizard(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteWizard(rctx, args["input"].(*model.WizardDeleteByID))
+		return ec.resolvers.Mutation().DeleteWizard(rctx, args["input"].(*model.RequestWithID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2179,41 +2108,6 @@ func (ec *executionContext) _Page_buttons(ctx context.Context, field graphql.Col
 	return ec.marshalNButton2ᚕᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐButtonᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Todos(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Todo)
-	fc.Result = res
-	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐTodoᚄ(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_logoutAuth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2316,7 +2210,7 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetUser(rctx, args["input"].(model.UserFindByID))
+		return ec.resolvers.Query().GetUser(rctx, args["input"].(model.RequestWithID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2400,7 +2294,7 @@ func (ec *executionContext) _Query_getWizard(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetWizard(rctx, args["input"].(model.WizardFindByID))
+		return ec.resolvers.Query().GetWizard(rctx, args["input"].(model.RequestWithID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2442,7 +2336,7 @@ func (ec *executionContext) _Query_getResultsForUser(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetResultsForUser(rctx, args["input"].(model.ResultsFindByID))
+		return ec.resolvers.Query().GetResultsForUser(rctx, args["input"].(model.RequestWithID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2484,7 +2378,7 @@ func (ec *executionContext) _Query_getResultsForModer(ctx context.Context, field
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetResultsForModer(rctx, args["input"].(model.ResultsFindByID))
+		return ec.resolvers.Query().GetResultsForModer(rctx, args["input"].(model.RequestWithID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2857,146 +2751,6 @@ func (ec *executionContext) _Role_name(ctx context.Context, field graphql.Collec
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Todo",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Todo",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Text, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Todo",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Done, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Todo_user(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Todo",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.User, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
@@ -4706,8 +4460,8 @@ func (ec *executionContext) unmarshalInputLoginRequest(ctx context.Context, obj 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputResultsFindByID(ctx context.Context, obj interface{}) (model.ResultsFindByID, error) {
-	var it model.ResultsFindByID
+func (ec *executionContext) unmarshalInputRequestWithID(ctx context.Context, obj interface{}) (model.RequestWithID, error) {
+	var it model.RequestWithID
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -4841,118 +4595,6 @@ func (ec *executionContext) unmarshalInputUpdateWizard(ctx context.Context, obj 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pages"))
 			it.Pages, err = ec.unmarshalNInputPage2ᚕᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐInputPageᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "token":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
-			it.Token, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputUserDeleteByID(ctx context.Context, obj interface{}) (model.UserDeleteByID, error) {
-	var it model.UserDeleteByID
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalNID2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "token":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
-			it.Token, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputUserFindByID(ctx context.Context, obj interface{}) (model.UserFindByID, error) {
-	var it model.UserFindByID
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalNID2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "token":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
-			it.Token, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputWizardDeleteByID(ctx context.Context, obj interface{}) (model.WizardDeleteByID, error) {
-	var it model.WizardDeleteByID
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalNID2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "token":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
-			it.Token, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputWizardFindByID(ctx context.Context, obj interface{}) (model.WizardFindByID, error) {
-	var it model.WizardFindByID
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalNID2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5264,20 +4906,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "todos":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_todos(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "logoutAuth":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5470,48 +5098,6 @@ func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "name":
 			out.Values[i] = ec._Role_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var todoImplementors = []string{"Todo"}
-
-func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj *model.Todo) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, todoImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Todo")
-		case "id":
-			out.Values[i] = ec._Todo_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "text":
-			out.Values[i] = ec._Todo_text(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "done":
-			out.Values[i] = ec._Todo_done(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "user":
-			out.Values[i] = ec._Todo_user(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -5937,21 +5523,6 @@ func (ec *executionContext) marshalNID2int(ctx context.Context, sel ast.Selectio
 	return res
 }
 
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalID(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalID(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
 func (ec *executionContext) unmarshalNInputButton2ᚕᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐInputButtonᚄ(ctx context.Context, v interface{}) ([]*model.InputButton, error) {
 	var vSlice []interface{}
 	if v != nil {
@@ -6178,6 +5749,11 @@ func (ec *executionContext) marshalNPage2ᚖgithubᚗcomᚋBrazenFoxᚋWizardApp
 	return ec._Page(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNRequestWithID2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐRequestWithID(ctx context.Context, v interface{}) (model.RequestWithID, error) {
+	res, err := ec.unmarshalInputRequestWithID(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNResult2ᚕᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐResultᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Result) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -6223,11 +5799,6 @@ func (ec *executionContext) marshalNResult2ᚖgithubᚗcomᚋBrazenFoxᚋWizardA
 		return graphql.Null
 	}
 	return ec._Result(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNResultsFindByID2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐResultsFindByID(ctx context.Context, v interface{}) (model.ResultsFindByID, error) {
-	res, err := ec.unmarshalInputResultsFindByID(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNRole2ᚕᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Role) graphql.Marshaler {
@@ -6322,53 +5893,6 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	return ret
 }
 
-func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Todo) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNTodo2ᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐTodo(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v *model.Todo) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Todo(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNToken2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐToken(ctx context.Context, v interface{}) (model.Token, error) {
 	res, err := ec.unmarshalInputToken(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6430,11 +5954,6 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋBrazenFoxᚋWizardApp
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUserFindByID2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐUserFindByID(ctx context.Context, v interface{}) (model.UserFindByID, error) {
-	res, err := ec.unmarshalInputUserFindByID(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) marshalNWizard2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐWizard(ctx context.Context, sel ast.SelectionSet, v model.Wizard) graphql.Marshaler {
 	return ec._Wizard(ctx, sel, &v)
 }
@@ -6484,11 +6003,6 @@ func (ec *executionContext) marshalNWizard2ᚖgithubᚗcomᚋBrazenFoxᚋWizardA
 		return graphql.Null
 	}
 	return ec._Wizard(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNWizardFindByID2githubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐWizardFindByID(ctx context.Context, v interface{}) (model.WizardFindByID, error) {
-	res, err := ec.unmarshalInputWizardFindByID(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -6760,6 +6274,14 @@ func (ec *executionContext) unmarshalOCreateWizard2ᚖgithubᚗcomᚋBrazenFox�
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalORequestWithID2ᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐRequestWithID(ctx context.Context, v interface{}) (*model.RequestWithID, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputRequestWithID(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6789,22 +6311,6 @@ func (ec *executionContext) unmarshalOUpdateWizard2ᚖgithubᚗcomᚋBrazenFox�
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputUpdateWizard(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOUserDeleteByID2ᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐUserDeleteByID(ctx context.Context, v interface{}) (*model.UserDeleteByID, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputUserDeleteByID(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOWizardDeleteByID2ᚖgithubᚗcomᚋBrazenFoxᚋWizardAppGraphQLᚋgraphᚋmodelᚐWizardDeleteByID(ctx context.Context, v interface{}) (*model.WizardDeleteByID, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputWizardDeleteByID(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
