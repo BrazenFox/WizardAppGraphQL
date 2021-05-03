@@ -98,6 +98,8 @@ type Wizard{
     pages:[Page!]!
 }
 
+
+
 type Page{
     id:ID!
     name:String!

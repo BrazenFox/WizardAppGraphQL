@@ -328,6 +328,7 @@ func (r *queryResolver) GetWizard(ctx context.Context, input model.RequestWithID
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusOK {
 		bodyResponse, err := ioutil.ReadAll(resp.Body)
+
 		if err != nil {
 			panic(err)
 		}
@@ -354,6 +355,7 @@ func (r *queryResolver) GetResultsForUser(ctx context.Context, input model.Reque
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusOK {
 		bodyResponse, err := ioutil.ReadAll(resp.Body)
+		log.Println(string(bodyResponse))
 		if err != nil {
 			panic(err)
 		}
